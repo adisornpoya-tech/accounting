@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บัญชีรายรับรายจ่าย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F3EC;
+    --paper-line:#DCD5C4;
+    --ink:#20261F;
+    --ink-soft:#5B6156;
+    --ledger-green:#2F4B3C;
+    --income:#2F6B4F;
+    --income-bg:#E7EFE6;
+    --expense:#9C4A3A;
+    --expense-bg:#F3E7E2;
+    --gold:#B8863B;
+    --card:#FFFEFA;
+    --shadow: 0 1px 2px rgba(32,38,31,0.06), 0 2px 8px rgba(32,38,31,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px);
+    background-size: 100% 42px;
+    color:var(--ink);
+    font-family:'Sarabun',sans-serif;
+    min-height:100vh;
+    padding:28px 16px 80px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  header.top{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:2px solid var(--ledger-green);
+    padding-bottom:14px; margin-bottom:22px; flex-wrap:wrap; gap:12px;
+  }
+  .brand-eyebrow{
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--gold); font-weight:600; margin-bottom:4px;
+  }
+  h1{
+    font-family:'Newsreader',serif; font-weight:600; font-style:italic;
+    font-size:30px; margin:0; color:var(--ledger-green);
+  }
+  .period-control{display:flex; gap:8px; align-items:center;}
+  select, input[type=number], input[type=text], input[type=date]{
+    font-family:'Sarabun',sans-serif; font-size:14px;
+    border:1px solid var(--paper-line); background:var(--card);
+    border-radius:6px; padding:8px 10px; color:var(--ink);
+  }
+  select:focus, input:focus{outline:2px solid var(--gold); outline-offset:1px;}
+
+  .summary-row{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:26px;
+  }
+  @media (max-width:640px){ .summary-row{grid-template-columns:1fr;} }
+  .sum-card{
+    background:var(--card); border:1px solid var(--paper-line); border-radius:10px;
+    padding:16px 18px; box-shadow:var(--shadow); position:relative; overflow:hidden;
+  }
+  .sum-card::before{
+    content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
+  }
+  .sum-card.income::before{background:var(--income);}
+  .sum-card.expense::before{background:var(--expense);}
+  .sum-card.net::before{background:var(--gold);}
+  .sum-label{font-size:12px; color:var(--ink-soft); letter-spacing:.04em;}
+  .sum-value{font-family:'Newsreader',serif; font-size:26px; font-weight:600; margin-top:4px; font-variant-numeric: tabular-nums;}
+  .sum-card.income .sum-value{color:var(--income);}
+  .sum-card.expense .sum-value{color:var(--expense);}
+  .sum-card.net .sum-value{color:var(--ledger-green);}
+  .sum-sub{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+
+  .panel{
+    background:var(--card); border:1px solid var(--paper-line); border-radius:10px;
+    box-shadow:var(--shadow); padding:20px; margin-bottom:20px;
+  }
+  .panel h2{
+    font-family:'Newsreader',serif; font-style:italic; font-weight:600;
+    font-size:19px; margin:0 0 14px; color:var(--ledger-green);
+    display:flex; align-items:center; gap:8px;
+  }
+  .panel h2::before{content:'§'; color:var(--gold); font-style:normal;}
+
+  form.entry-form{
+    display:grid; grid-template-columns: 130px 110px 1fr 1fr 130px 90px; gap:10px; align-items:end;
+  }
+  @media (max-width:820px){ form.entry-form{grid-template-columns:1fr 1fr;} }
+  .field label{display:block; font-size:11px; color:var(--ink-soft); margin-bottom:4px;}
+  .field select, .field input{width:100%;}
+  .type-toggle{display:flex; border:1px solid var(--paper-line); border-radius:6px; overflow:hidden;}
+  .type-toggle button{
+    flex:1; border:none; background:var(--card); padding:8px 6px; font-family:'Sarabun'; font-size:13px;
+    cursor:pointer; color:var(--ink-soft);
+  }
+  .type-toggle button.active[data-type="income"]{background:var(--income-bg); color:var(--income); font-weight:600;}
+  .type-toggle button.active[data-type="expense"]{background:var(--expense-bg); color:var(--expense); font-weight:600;}
+  .btn-add{
+    background:var(--ledger-green); color:#fff; border:none; border-radius:6px;
+    padding:9px 14px; font-family:'Sarabun'; font-weight:600; font-size:14px; cursor:pointer;
+    transition:background .15s;
+  }
+  .btn-add:hover{background:#1c2c22;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  thead th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-soft); border-bottom:1px solid var(--ledger-green); padding:6px 8px; font-weight:600;
+  }
+  tbody td{padding:9px 8px; border-bottom:1px solid var(--paper-line); vertical-align:top;}
+  tbody tr:hover{background:rgba(184,134,59,0.06);}
+  .amt{font-variant-numeric: tabular-nums; text-align:right; font-weight:600;}
+  .amt.income{color:var(--income);}
+  .amt.expense{color:var(--expense);}
+  .tag{
+    display:inline-block; font-size:11px; padding:2px 8px; border-radius:20px;
+    background:var(--paper); color:var(--ink-soft); border:1px solid var(--paper-line);
+  }
+  .del-btn{
+    border:none; background:none; color:var(--expense); cursor:pointer; font-size:12px;
+    opacity:.55; padding:2px 6px;
+  }
+  .del-btn:hover{opacity:1; text-decoration:underline;}
+  .empty-row td{text-align:center; color:var(--ink-soft); padding:30px 0; font-style:italic;}
+
+  .breakdown{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  @media (max-width:720px){ .breakdown{grid-template-columns:1fr;} }
+  .cat-row{display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:13px;}
+  .cat-name{width:110px; flex-shrink:0; color:var(--ink-soft);}
+  .cat-bar-bg{flex:1; background:var(--paper); border-radius:4px; height:8px; overflow:hidden;}
+  .cat-bar{height:100%; border-radius:4px;}
+  .cat-bar.income{background:var(--income);}
+  .cat-bar.expense{background:var(--expense);}
+  .cat-amt{width:90px; text-align:right; font-variant-numeric: tabular-nums; font-weight:600;}
+
+  .tax-note{
+    background:var(--income-bg); border:1px dashed var(--income); border-radius:8px;
+    padding:14px 16px; font-size:12.5px; line-height:1.7; color:#2b3f31;
+  }
+  .tax-note b{color:var(--ledger-green);}
+
+  .toolbar{display:flex; justify-content:flex-end; gap:10px; margin-bottom:10px;}
+  .btn-outline{
+    background:transparent; border:1px solid var(--paper-line); color:var(--ink-soft);
+    border-radius:6px; padding:7px 12px; font-size:12.5px; cursor:pointer; font-family:'Sarabun';
+  }
+  .btn-outline:hover{border-color:var(--ledger-green); color:var(--ledger-green);}
+
+  .footnote{text-align:center; font-size:11px; color:var(--ink-soft); margin-top:24px; line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <div class="brand-eyebrow">สมุดบัญชี · ผู้มีรายได้อิสระ / กิจการส่วนบุคคล</div>
+      <h1>รายรับ–รายจ่าย และกำไรสุทธิ</h1>
+    </div>
+    <div class="period-control">
+      <div class="field">
+        <label for="monthSel">เดือน</label>
+        <select id="monthSel"></select>
+      </div>
+      <div class="field">
+        <label for="yearSel">ปี (พ.ศ.)</label>
+        <select id="yearSel"></select>
+      </div>
+    </div>
+  </header>
+
+  <section class="summary-row">
+    <div class="sum-card income">
+      <div class="sum-label">รายรับรวม</div>
+      <div class="sum-value" id="sumIncome">฿0.00</div>
+      <div class="sum-sub" id="countIncome">0 รายการ</div>
+    </div>
+    <div class="sum-card expense">
+      <div class="sum-label">รายจ่ายรวม</div>
+      <div class="sum-value" id="sumExpense">฿0.00</div>
+      <div class="sum-sub" id="countExpense">0 รายการ</div>
+    </div>
+    <div class="sum-card net">
+      <div class="sum-label">กำไรสุทธิ (รายรับ − รายจ่าย)</div>
+      <div class="sum-value" id="sumNet">฿0.00</div>
+      <div class="sum-sub" id="netPct">—</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>บันทึกรายการใหม่</h2>
+    <form class="entry-form" id="entryForm">
+      <div class="field">
+        <label for="fDate">วันที่</label>
+        <input type="date" id="fDate" required>
+      </div>
+      <div class="field">
+        <label>ประเภท</label>
+        <div class="type-toggle" id="typeToggle">
+          <button type="button" data-type="income" class="active">รายรับ</button>
+          <button type="button" data-type="expense">รายจ่าย</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="fCat">หมวดหมู่</label>
+        <select id="fCat"></select>
+      </div>
+      <div class="field">
+        <label for="fDesc">รายละเอียด</label>
+        <input type="text" id="fDesc" placeholder="เช่น ค่าสินค้า, ค่าเช่า">
+      </div>
+      <div class="field">
+        <label for="fAmt">จำนวนเงิน (บาท)</label>
+        <input type="number" id="fAmt" min="0" step="0.01" placeholder="0.00" required>
+      </div>
+      <div class="field">
+        <button type="submit" class="btn-add">＋ บันทึก</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="toolbar">
+      <button class="btn-outline" id="exportBtn">↓ ส่งออก CSV (สำหรับยื่นภาษี)</button>
+      <button class="btn-outline" id="clearMonthBtn">ล้างรายการเดือนนี้</button>
+    </div>
+    <h2>รายการเดือนนี้</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:90px;">วันที่</th>
+          <th style="width:70px;">ประเภท</th>
+          <th>หมวดหมู่</th>
+          <th>รายละเอียด</th>
+          <th style="width:110px;" class="amt-head">จำนวนเงิน</th>
+          <th style="width:40px;"></th>
+        </tr>
+      </thead>
+      <tbody id="entryBody">
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>สรุปตามหมวดหมู่</h2>
+    <div class="breakdown">
+      <div>
+        <div class="sum-label" style="margin-bottom:10px;">รายรับ</div>
+        <div id="incomeBreakdown"></div>
+      </div>
+      <div>
+        <div class="sum-label" style="margin-bottom:10px;">รายจ่าย</div>
+        <div id="expenseBreakdown"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>หมายเหตุสำหรับยื่นภาษี</h2>
+    <div class="tax-note">
+      ตัวเลข <b>กำไรสุทธิ</b> ด้านบนคือ "รายรับ − รายจ่ายที่หักได้" ซึ่งเป็นฐานเบื้องต้นสำหรับกรอกในแบบแสดงรายการภาษีเงินได้บุคคลธรรมดา (เช่น ภ.ง.ด. 90/94 กรณีมีรายได้ประเภทธุรกิจ/วิชาชีพอิสระ) หรือใช้ประกอบการยื่นภาษีมูลค่าเพิ่ม/ภาษีธุรกิจ<br><br>
+      • เครื่องมือนี้ช่วย <b>รวบรวมและคำนวณเบื้องต้นเท่านั้น</b> ไม่ใช่โปรแกรมยื่นภาษีอย่างเป็นทางการ และไม่ได้เชื่อมกับระบบกรมสรรพากร<br>
+      • ควรตรวจสอบว่าค่าใช้จ่ายแต่ละรายการเข้าเงื่อนไข "หักตามจริง" หรือใช้ "อัตราเหมา" ตามประเภทเงินได้ (มาตรา 40) ให้ถูกต้อง<br>
+      • แนะนำให้เก็บใบเสร็จ/หลักฐานประกอบทุกรายการไว้ อย่างน้อย 5 ปี ตามที่กฎหมายกำหนด<br>
+      • ก่อนยื่นจริง ควรตรวจทานกับผู้ทำบัญชี/ตรวจสอบบัญชี หรือเว็บไซต์กรมสรรพากร (rd.go.th) เพื่อความถูกต้องครบถ้วน
+    </div>
+  </section>
+
+  <div class="footnote">ข้อมูลบันทึกไว้ในเครื่องนี้เท่านั้น (ส่วนตัว ไม่แชร์กับผู้อื่น) · ใช้ปุ่ม "ส่งออก CSV" เพื่อสำรองข้อมูลหรือส่งให้นักบัญชี</div>
+</div>
+
+<script>
+const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+const INCOME_CATS = ["ขายสินค้า","ค่าบริการ/ค่าจ้าง","ค่าคอมมิชชั่น","ดอกเบี้ย/เงินปันผล","อื่นๆ"];
+const EXPENSE_CATS = ["ต้นทุนสินค้า","ค่าเช่า","เงินเดือน/ค่าแรง","ค่าสาธารณูปโภค","ค่าเดินทาง","ค่าการตลาด","ค่าธรรมเนียม/ดอกเบี้ย","วัสดุ/อุปกรณ์","อื่นๆ"];
+
+let entries = [];
+let currentType = 'income';
+
+const now = new Date();
+const monthSel = document.getElementById('monthSel');
+const yearSel = document.getElementById('yearSel');
+THAI_MONTHS.forEach((m,i)=>{
+  const o = document.createElement('option'); o.value=i; o.textContent=m;
+  if(i===now.getMonth()) o.selected=true;
+  monthSel.appendChild(o);
+});
+const currentBEYear = now.getFullYear()+543;
+for(let y=currentBEYear-3; y<=currentBEYear+1; y++){
+  const o = document.createElement('option'); o.value=y; o.textContent=y;
+  if(y===currentBEYear) o.selected=true;
+  yearSel.appendChild(o);
+}
+document.getElementById('fDate').valueAsDate = now;
+
+function populateCategories(){
+  const catSel = document.getElementById('fCat');
+  catSel.innerHTML='';
+  const list = currentType==='income' ? INCOME_CATS : EXPENSE_CATS;
+  list.forEach(c=>{
+    const o = document.createElement('option'); o.value=c; o.textContent=c;
+    catSel.appendChild(o);
+  });
+}
+populateCategories();
+
+document.getElementById('typeToggle').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  currentType = btn.dataset.type;
+  document.querySelectorAll('#typeToggle button').forEach(b=>b.classList.toggle('active', b===btn));
+  populateCategories();
+});
+
+function fmt(n){
+  return '฿' + Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+async function loadEntries(){
+  try{
+    const res = await window.storage.get('ledger-entries', false);
+    entries = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){
+    entries = [];
+  }
+  render();
+}
+
+async function saveEntries(){
+  try{
+    await window.storage.set('ledger-entries', JSON.stringify(entries), false);
+  }catch(e){
+    console.error('save failed', e);
+  }
+}
+
+function getFilteredEntries(){
+  const m = parseInt(monthSel.value);
+  const y = parseInt(yearSel.value) - 543;
+  return entries.filter(en=>{
+    const d = new Date(en.date);
+    return d.getMonth()===m && d.getFullYear()===y;
+  }).sort((a,b)=> new Date(b.date)-new Date(a.date));
+}
+
+function render(){
+  const filtered = getFilteredEntries();
+  const body = document.getElementById('entryBody');
+  body.innerHTML='';
+  if(filtered.length===0){
+    body.innerHTML = '<tr class="empty-row"><td colspan="6">ยังไม่มีรายการในเดือนนี้ — เริ่มบันทึกรายการด้านบน</td></tr>';
+  } else {
+    filtered.forEach(en=>{
+      const tr = document.createElement('tr');
+      const dateStr = new Date(en.date).toLocaleDateString('th-TH', {day:'2-digit', month:'short'});
+      tr.innerHTML = `
+        <td>${dateStr}</td>
+        <td><span class="tag" style="${en.type==='income' ? 'color:#2F6B4F;border-color:#2F6B4F55;' : 'color:#9C4A3A;border-color:#9C4A3A55;'}">${en.type==='income'?'รายรับ':'รายจ่าย'}</span></td>
+        <td>${en.category}</td>
+        <td>${en.desc || '—'}</td>
+        <td class="amt ${en.type}">${en.type==='expense'?'−':''}${fmt(en.amount)}</td>
+        <td><button class="del-btn" data-id="${en.id}">ลบ</button></td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  const totalIncome = filtered.filter(e=>e.type==='income').reduce((s,e)=>s+Number(e.amount),0);
+  const totalExpense = filtered.filter(e=>e.type==='expense').reduce((s,e)=>s+Number(e.amount),0);
+  const net = totalIncome - totalExpense;
+
+  document.getElementById('sumIncome').textContent = fmt(totalIncome);
+  document.getElementById('sumExpense').textContent = fmt(totalExpense);
+  document.getElementById('sumNet').textContent = fmt(net);
+  document.getElementById('countIncome').textContent = filtered.filter(e=>e.type==='income').length + ' รายการ';
+  document.getElementById('countExpense').textContent = filtered.filter(e=>e.type==='expense').length + ' รายการ';
+  document.getElementById('netPct').textContent = totalIncome>0 ? 'อัตรากำไร ' + ((net/totalIncome)*100).toFixed(1) + '%' : '—';
+
+  renderBreakdown('incomeBreakdown', filtered.filter(e=>e.type==='income'), totalIncome, 'income');
+  renderBreakdown('expenseBreakdown', filtered.filter(e=>e.type==='expense'), totalExpense, 'expense');
+}
+
+function renderBreakdown(elId, list, total, type){
+  const el = document.getElementById(elId);
+  el.innerHTML='';
+  const byCat = {};
+  list.forEach(e=>{ byCat[e.category] = (byCat[e.category]||0) + Number(e.amount); });
+  const catList = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  if(catList.length===0){
+    el.innerHTML = '<div style="font-size:12.5px;color:var(--ink-soft);font-style:italic;">ไม่มีข้อมูล</div>';
+    return;
+  }
+  catList.forEach(([cat,amt])=>{
+    const pct = total>0 ? (amt/total*100) : 0;
+    const row = document.createElement('div');
+    row.className='cat-row';
+    row.innerHTML = `
+      <div class="cat-name">${cat}</div>
+      <div class="cat-bar-bg"><div class="cat-bar ${type}" style="width:${pct}%"></div></div>
+      <div class="cat-amt">${fmt(amt)}</div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+document.getElementById('entryForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const date = document.getElementById('fDate').value;
+  const cat = document.getElementById('fCat').value;
+  const desc = document.getElementById('fDesc').value.trim();
+  const amt = parseFloat(document.getElementById('fAmt').value);
+  if(!date || isNaN(amt) || amt<=0) return;
+
+  entries.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    date, type: currentType, category: cat, desc, amount: amt
+  });
+  await saveEntries();
+  document.getElementById('fDesc').value='';
+  document.getElementById('fAmt').value='';
+  render();
+});
+
+document.getElementById('entryBody').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('.del-btn');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  entries = entries.filter(en=>en.id!==id);
+  await saveEntries();
+  render();
+});
+
+document.getElementById('clearMonthBtn').addEventListener('click', async ()=>{
+  const filtered = getFilteredEntries();
+  if(filtered.length===0) return;
+  if(!confirm('ต้องการลบรายการทั้งหมดของเดือนนี้ใช่หรือไม่? (ไม่สามารถกู้คืนได้)')) return;
+  const idsToRemove = new Set(filtered.map(e=>e.id));
+  entries = entries.filter(e=>!idsToRemove.has(e.id));
+  await saveEntries();
+  render();
+});
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const filtered = getFilteredEntries();
+  if(filtered.length===0){ alert('ไม่มีรายการให้ส่งออกในเดือนนี้'); return; }
+  let csv = '\uFEFF' + 'วันที่,ประเภท,หมวดหมู่,รายละเอียด,จำนวนเงิน\n';
+  filtered.slice().reverse().forEach(en=>{
+    const row = [en.date, en.type==='income'?'รายรับ':'รายจ่าย', en.category, (en.desc||'').replace(/,/g,' '), en.amount];
+    csv += row.join(',') + '\n';
+  });
+  const totalIncome = filtered.filter(e=>e.type==='income').reduce((s,e)=>s+Number(e.amount),0);
+  const totalExpense = filtered.filter(e=>e.type==='expense').reduce((s,e)=>s+Number(e.amount),0);
+  csv += `\nรวมรายรับ,,,,${totalIncome}\n`;
+  csv += `รวมรายจ่าย,,,,${totalExpense}\n`;
+  csv += `กำไรสุทธิ,,,,${totalIncome-totalExpense}\n`;
+
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const mName = THAI_MONTHS[parseInt(monthSel.value)];
+  a.href = url;
+  a.download = `บัญชี-${mName}-${yearSel.value}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+monthSel.addEventListener('change', render);
+yearSel.addEventListener('change', render);
+
+loadEntries();
+</script>
+</body>
+</html>
