@@ -1,0 +1,228 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Lamunnee Sales Report</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+/* Layout: one landscape "sheet" pair per month — calendar sheet, then dashboard sheet — like a printed monthly sales pack */
+:root{
+  --bg:#f3f5f1; --sheet:#ffffff; --ink:#1d2621; --muted:#66716a; --line:#dfe4dc;
+  --accent:#2f7a52; --accent-soft:#e3f0e7; --sun:#b4473a;
+  --c1:#2f7a52; --c2:#3f6fb0; --c3:#c98a2e; --c4:#7a5aa6; --c5:#9aa49d;
+  --display:"Bai Jamjuree","IBM Plex Sans Thai",system-ui,sans-serif;
+  --body:"IBM Plex Sans Thai",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141916; --sheet:#1c231f; --ink:#e7ece8; --muted:#9aa69e; --line:#2e3832;
+  --accent:#5fb987; --accent-soft:#22362a; --sun:#e07b6e;
+  --c1:#5fb987; --c2:#7aa3e0; --c3:#e0aa58; --c4:#a98bd4; --c5:#6f7a73; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141916; --sheet:#1c231f; --ink:#e7ece8; --muted:#9aa69e; --line:#2e3832;
+  --accent:#5fb987; --accent-soft:#22362a; --sun:#e07b6e;
+  --c1:#5fb987; --c2:#7aa3e0; --c3:#e0aa58; --c4:#a98bd4; --c5:#6f7a73; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:1080px;margin:0 auto;display:grid;gap:28px}
+.num{font-variant-numeric:tabular-nums}
+header.cover{display:grid;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-size:clamp(26px,4vw,38px);font-weight:700;margin:0;text-wrap:balance;line-height:1.15}
+.biz{color:var(--muted);font-size:13px}
+nav.months{display:flex;flex-wrap:wrap;gap:8px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:8px}
+nav.months a{font-family:var(--display);font-weight:600;color:var(--ink);text-decoration:none;border:1px solid var(--line);background:var(--sheet);padding:6px 14px;border-radius:999px}
+nav.months a:hover,nav.months a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+.summary{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:12px}
+.sumrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.sumcell{display:grid;gap:2px;padding:10px 12px;border-radius:8px;background:var(--bg)}
+.sumcell b{font-family:var(--display);font-size:20px}
+.sumcell small{color:var(--muted)}
+section.month{display:grid;gap:16px;scroll-margin-top:64px}
+.mhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;border-bottom:2px solid var(--ink);padding-bottom:6px}
+.mhead h2{font-family:var(--display);font-size:28px;margin:0;font-weight:700}
+.mhead span{color:var(--muted)}
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:14px;min-width:0}
+.sheet h3{font-family:var(--display);font-size:17px;margin:0;font-weight:600}
+.sheet h3 small{font-family:var(--body);font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.calwrap{overflow-x:auto}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(92px,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line);min-width:644px}
+.dow{font-size:12px;color:var(--muted);padding:6px 8px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg)}
+.dow.sun{color:var(--sun)}
+.day{min-height:84px;padding:6px 8px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px;position:relative}
+.day .d{font-size:12px;color:var(--muted)}
+.day.sun .d{color:var(--sun)}
+.day.blank{background:repeating-linear-gradient(135deg,transparent 0 6px,var(--bg) 6px 7px)}
+.day .o{font-size:11.5px;color:var(--muted)}
+.day .a{font-family:var(--display);font-weight:600;font-size:14px}
+.day .bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--line)}
+.day .bar i{display:block;height:100%;background:var(--accent)}
+.day.sale{background:var(--accent-soft)}
+.day.top{outline:2px solid var(--accent);outline-offset:-2px}
+.day .tag{font-size:10.5px;color:var(--accent);font-weight:600}
+.day.na .d::after{content:" · ยังไม่มีข้อมูล";font-size:10.5px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:2px;align-content:start}
+.kpi .l{font-size:12px;color:var(--muted)}
+.kpi .v{font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2}
+.kpi .s{font-size:11.5px;color:var(--muted)}
+.kpi.net .v{color:var(--accent)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.panel{border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px;min-width:0}
+.panel h4{margin:0;font-size:13.5px;font-weight:600}
+svg text{font-family:var(--body)}
+.donut{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;align-items:center}
+.rows{display:grid;gap:6px}
+.row{display:grid;grid-template-columns:12px minmax(0,1fr) auto auto;gap:8px;align-items:center;font-size:13px}
+.row i{width:10px;height:10px;border-radius:2px}
+.row .p{color:var(--muted);width:46px;text-align:right}
+.hb{display:grid;gap:8px}
+.hb .r{display:grid;grid-template-columns:150px minmax(0,1fr) 78px;gap:8px;align-items:center;font-size:13px}
+.hb .t{height:14px;background:var(--bg);border-radius:3px;overflow:hidden}
+.hb .t i{display:block;height:100%}
+.hb .val{text-align:right}
+.note{font-size:12.5px;color:var(--muted)}
+footer{font-size:12px;color:var(--muted)}
+@media (max-width:760px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  .sumrow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hb .r{grid-template-columns:110px minmax(0,1fr) 70px}
+  .donut{grid-template-columns:120px minmax(0,1fr)}
+}
+@media print{
+  nav.months{display:none} body{background:#fff}
+  .sheet{break-inside:avoid;page-break-after:always;border:none}
+  @page{size:A4 landscape;margin:12mm}
+}
+</style>
+
+<div class="wrap">
+  <header class="cover">
+    <div class="eyebrow">Sales Report · รายงานยอดขาย</div>
+    <h1>ละมุนนี · ยอดขาย ก.ค. – ต.ค. 2569</h1>
+    <div class="biz">นายพิชญ์ตินันต์ กันหา · ทะเบียนพาณิชย์ 1419900285772 · เลขประจำตัวผู้เสียภาษี 1419900285772 · เฟอร์นิเจอร์ ไม้แปรรูป ถ่าน เตาเผาถ่านไร้ควัน</div>
+  </header>
+
+  <div class="summary" id="summary"></div>
+  <nav class="months" id="nav" aria-label="เลือกเดือน"></nav>
+  <div id="months" class="wrap" style="max-width:none"></div>
+
+  <footer>จัดทำโดยผู้ประกอบการจากบันทึกรายรับรายจ่ายรายวันของกิจการ ใช้ประกอบกับ Bank Statement ฉบับที่ธนาคารออกให้ · Prepared by the business owner from daily business records, to accompany the official bank statement.</footer>
+</div>
+
+<script>
+const DAILY={"2026-07":{"1":[10946,9,{"C":3064,"W":1462,"F":6420}],"2":[6630,4,{"F":1550,"C":580,"M":4500}],"3":[290,2,{"C":170,"F":120}],"4":[2500,4,{"M":1500,"F":1000}],"5":[1690,5,{"C":590,"F":1100}],"6":[5378,2,{"W":5198,"C":180}],"7":[850,1,{"C":850}],"8":[2080,2,{"M":1900,"C":180}],"9":[120,1,{"F":120}],"10":[200,1,{"M":200}],"11":[2340,2,{"F":2340}],"12":[1400,1,{"M":1400}],"13":[5800,3,{"M":2000,"F":3800}],"14":[300,1,{"F":300}],"15":[16315,7,{"F":1946,"W":2849,"K":11040,"C":480}],"16":[5338,5,{"F":4592,"W":726,"C":20}],"17":[2030,2,{"C":1700,"F":330}],"19":[1708,3,{"F":800,"W":908}],"21":[1790,1,{"K":1790}],"23":[1800,2,{"F":1800}],"24":[2010,3,{"M":1800,"F":210}],"25":[3150,4,{"F":1850,"M":1300}],"26":[420,1,{"C":420}],"27":[850,1,{"F":850}],"28":[300,1,{"F":300}],"30":[1400,1,{"F":1400}],"31":[18348,12,{"W":12692,"F":4216,"C":1440}]},"2026-08":{"1":[5740,9,{"F":3460,"C":2280}],"2":[780,3,{"C":60,"F":720}],"3":[1645,4,{"F":1645}],"4":[1468,3,{"F":1468}],"5":[272,1,{"W":272}],"6":[2350,2,{"K":1700,"F":650}],"7":[330,1,{"F":330}],"8":[1080,3,{"F":1080}],"9":[2610,6,{"F":1900,"C":710}],"10":[700,3,{"F":700}],"12":[1455,6,{"F":1375,"C":80}],"13":[790,2,{"F":790}],"15":[8846,10,{"F":2868,"W":3818,"C":2160}],"16":[6575,6,{"K":2085,"W":1730,"F":2760}],"17":[1040,1,{"F":1040}],"18":[500,1,{"F":500}],"19":[4730,8,{"F":2620,"C":310,"K":1800}],"20":[620,2,{"F":620}],"21":[1352,5,{"T":77,"F":1275}],"22":[1170,1,{"F":1170}],"23":[650,2,{"F":650}],"24":[790,3,{"C":540,"F":250}],"25":[320,1,{"F":320}],"26":[1310,3,{"F":1130,"C":180}],"27":[4750,4,{"F":4750}],"28":[1500,1,{"F":1500}],"29":[1770,2,{"F":1770}],"30":[300,1,{"F":300}],"31":[6096,11,{"F":2962,"W":1634,"C":1500}]},"2026-09":{"1":[11884,11,{"F":7954,"K":1720,"C":2210}],"2":[1790,4,{"F":1790}],"3":[708,3,{"C":40,"F":668}],"4":[882,3,{"F":532,"C":350}],"5":[1740,5,{"C":180,"F":1560}],"6":[1533,3,{"F":1410,"W":123}],"7":[320,1,{"F":320}],"8":[913,3,{"F":733,"C":180}],"9":[9290,5,{"F":8580,"C":710}],"10":[320,1,{"F":320}],"11":[520,4,{"F":520}],"12":[665,2,{"F":665}],"13":[2944,10,{"W":1364,"F":1230,"C":350}],"14":[1834,4,{"W":1144,"F":690}],"15":[9182,9,{"F":6270,"C":2440,"W":472}],"16":[4700,7,{"W":2120,"C":1790,"F":790}],"17":[1930,4,{"F":1930}],"18":[390,2,{"F":50,"C":340}],"19":[2500,6,{"F":1450,"C":1050}],"20":[1065,3,{"F":1065}],"21":[1880,2,{"F":1880}],"22":[2500,4,{"F":1650,"C":850}],"23":[3730,4,{"F":1450,"K":1800,"C":480}],"24":[1850,2,{"F":1500,"C":350}],"25":[1250,2,{"F":1250}],"26":[7050,4,{"F":200,"K":6500,"C":350}],"27":[5750,4,{"F":5750}],"28":[6440,5,{"F":4500,"K":1900,"C":40}],"29":[6790,10,{"F":2340,"K":2500,"C":1950}],"30":[24062,13,{"F":20426,"K":1800,"W":1776,"C":60}]},"2026-10":{"1":[9204,19,{"F":5310,"W":1104,"C":2790}],"2":[2665,7,{"F":1965,"C":700}],"3":[571,4,{"C":40,"W":531}],"4":[5190,15,{"K":1290,"F":2160,"C":1740}],"6":[1600,1,{"F":1600}],"8":[1380,4,{"C":680,"F":700}],"9":[130,1,{"F":130}],"10":[1280,3,{"C":330,"F":950}]}};
+const MONTHS=[
+ {key:"2026-07",id:"jul",th:"กรกฎาคม 2569",en:"July 2026",short:"ก.ค.",expense:34875,chan:{k:74863,t:3420,d:17700}},
+ {key:"2026-08",id:"aug",th:"สิงหาคม 2569",en:"August 2026",short:"ส.ค.",expense:27725,chan:{k:46477,t:11245,d:300,l:3517}},
+ {key:"2026-09",id:"sep",th:"กันยายน 2569",en:"September 2026",short:"ก.ย.",expense:31701,chan:{k:86116,t:19044,l:11252}},
+ {key:"2026-10",id:"oct",th:"ตุลาคม 2569",en:"October 2026",short:"ต.ค.",expense:15640,chan:{k:7919,t:12591,l:1510},lastDay:10,partial:true}
+];
+const CAT={F:["เฟอร์นิเจอร์","Furniture","var(--c1)"],W:["ไม้แปรรูป","Processed timber","var(--c3)"],C:["ถ่าน","Charcoal","var(--c4)"],K:["เตาเผาถ่านไร้ควัน","Smokeless kilns","var(--c2)"],M:["ฝากเงินสดจากการขาย","Cash sales deposited","var(--c5)"],T:["ทดสอบ LINE PAY","LINE PAY test","var(--c5)"]};
+const CHAN={k:["รับโอน K PLUS","var(--c1)"],t:["ไทยช่วยไทย พลัส","var(--c2)"],d:["ฝากเงินสด","var(--c3)"],l:["LINE PAY","var(--c4)"]};
+const DOW=["อา. Sun","จ. Mon","อ. Tue","พ. Wed","พฤ. Thu","ศ. Fri","ส. Sat"];
+const fmt=n=>n.toLocaleString("en-US");
+const baht=n=>"฿"+fmt(n);
+
+function stats(m){
+  const days=DAILY[m.key], dim=new Date(+m.key.slice(0,4),+m.key.slice(5),0).getDate();
+  let total=0,n=0,cat={},top=[0,0];
+  for(const [d,[t,c,cs]] of Object.entries(days)){total+=t;n+=c;if(t>top[1])top=[+d,t];for(const k in cs)cat[k]=(cat[k]||0)+cs[k];}
+  return {days,dim,total,n,cat,top,active:Object.keys(days).length};
+}
+
+function summary(){
+  const S=MONTHS.map(m=>({m,...stats(m)}));
+  const full=S.filter(s=>!s.m.partial);
+  const inc=full.reduce((a,s)=>a+s.total,0), exp=full.reduce((a,s)=>a+s.m.expense,0);
+  document.getElementById("summary").innerHTML=`
+   <div class="sumrow">
+    <div class="sumcell"><small>ยอดขายรวม ก.ค.–ต.ค.* / Total sales</small><b class="num">${baht(S.reduce((a,s)=>a+s.total,0))}</b></div>
+    <div class="sumcell"><small>ยอดขายเฉลี่ย/เดือน (ก.ค.–ก.ย.)</small><b class="num">${baht(Math.round(inc/full.length))}</b></div>
+    <div class="sumcell"><small>คงเหลือสุทธิเฉลี่ย/เดือน (ก.ค.–ก.ย.)</small><b class="num">${baht(Math.round((inc-exp)/full.length))}</b></div>
+    <div class="sumcell"><small>จำนวนรายการขายทั้งหมด / Orders</small><b class="num">${fmt(S.reduce((a,s)=>a+s.n,0))}</b></div>
+   </div>
+   <div class="note">*ตุลาคม 2569 นับถึงวันที่ 10 ต.ค. · October 2026 covers 1–10 Oct only.</div>`;
+  document.getElementById("nav").innerHTML=MONTHS.map(m=>`<a href="#${m.id}">${m.th}</a>`).join("");
+}
+
+function calendar(m,s){
+  const first=new Date(+m.key.slice(0,4),+m.key.slice(5)-1,1).getDay();
+  let h=DOW.map((d,i)=>`<div class="dow${i===0?" sun":""}">${d}</div>`).join("");
+  for(let i=0;i<first;i++)h+=`<div class="day blank"></div>`;
+  for(let d=1;d<=s.dim;d++){
+    const r=s.days[d], sun=(first+d-1)%7===0, na=m.lastDay&&d>m.lastDay;
+    let cls="day"+(sun?" sun":"")+(r?" sale":"")+(r&&d===s.top[0]?" top":"")+(na?" na":"");
+    h+=`<div class="${cls}"><span class="d">${d}</span>`;
+    if(r){h+=`${d===s.top[0]?'<span class="tag">ยอดสูงสุดของเดือน</span>':""}<span class="o">${r[1]} รายการ</span><span class="a num">${baht(r[0])}</span><span class="bar"><i style="width:${Math.max(4,r[0]/s.top[1]*100)}%"></i></span>`;}
+    h+=`</div>`;
+  }
+  const rest=(7-(first+s.dim)%7)%7; for(let i=0;i<rest;i++)h+=`<div class="day blank"></div>`;
+  return `<div class="calwrap"><div class="cal">${h}</div></div>`;
+}
+
+function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p;}
+
+function areaChart(m,s){
+  const W=760,H=250,L=56,R=16,T=16,B=34, last=m.lastDay||s.dim;
+  const ymax=niceMax(s.top[1]), x=d=>L+(d-1)/(s.dim-1)*(W-L-R), y=v=>T+(1-v/ymax)*(H-T-B);
+  const pts=[];for(let d=1;d<=last;d++)pts.push([x(d),y(s.days[d]?s.days[d][0]:0)]);
+  const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join("");
+  const area=line+`L${pts.at(-1)[0].toFixed(1)},${y(0)}L${pts[0][0].toFixed(1)},${y(0)}Z`;
+  let g="";for(let i=0;i<=4;i++){const v=ymax*i/4,yy=y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--line)"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v>=1000?fmt(v/1000)+"k":v}</text>`;}
+  let xl="";for(let d=1;d<=s.dim;d++){if(d===1||d%5===0||d===s.dim)xl+=`<text x="${x(d)}" y="${H-12}" text-anchor="middle" font-size="11" fill="var(--muted)">${d}</text>`;}
+  let dots="";for(let d=1;d<=last;d++){const r=s.days[d];if(r)dots+=`<circle cx="${x(d)}" cy="${y(r[0])}" r="${d===s.top[0]?4.5:2.5}" fill="var(--accent)"><title>${d} ${m.short}: ${baht(r[0])} · ${r[1]} รายการ</title></circle>`;}
+  const tx=x(s.top[0]), anchor=tx>W-140?"end":tx<L+80?"start":"middle";
+  const peak=`<text x="${tx}" y="${y(s.top[1])-10}" text-anchor="${anchor}" font-size="12" font-weight="600" fill="var(--ink)">${s.top[0]} ${m.short} · ${baht(s.top[1])}</text>`;
+  const cut=m.lastDay?`<line x1="${x(last)}" x2="${x(last)}" y1="${T}" y2="${y(0)}" stroke="var(--muted)" stroke-dasharray="3 3"/><text x="${x(last)+6}" y="${T+40}" font-size="11.5" fill="var(--muted)">ข้อมูลถึง ${last} ${m.short}</text>`:"";
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="ยอดขายรายวัน ${m.th}">${g}<path d="${area}" fill="var(--accent)" fill-opacity=".16"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>${dots}${peak}${cut}<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--muted)"/>${xl}<text x="${W-R}" y="${H-12+0}" dy="0" text-anchor="end" font-size="11" fill="var(--muted)" dx="0"></text></svg><div class="note">แกนนอน: วันที่ · แกนตั้ง: ยอดขาย (บาท) · Daily sales in THB</div>`;
+}
+
+function donut(m,total){
+  const r=52,c=2*Math.PI*r;let off=0,arcs="",rows="";
+  for(const [k,v] of Object.entries(m.chan).sort((a,b)=>b[1]-a[1])){
+    const len=v/total*c;arcs+=`<circle cx="70" cy="70" r="${r}" fill="none" stroke="${CHAN[k][1]}" stroke-width="22" stroke-dasharray="${len} ${c-len}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)"><title>${CHAN[k][0]}: ${baht(v)}</title></circle>`;off+=len;
+    rows+=`<div class="row"><i style="background:${CHAN[k][1]}"></i><span>${CHAN[k][0]}</span><span class="num">${fmt(v)}</span><span class="p num">${(v/total*100).toFixed(1)}%</span></div>`;
+  }
+  return `<div class="donut"><svg viewBox="0 0 140 140" width="100%" role="img" aria-label="สัดส่วนช่องทางรับเงิน">${arcs}<text x="70" y="66" text-anchor="middle" font-size="10" fill="var(--muted)">ยอดขาย</text><text x="70" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink)">${fmt(total)}</text></svg><div class="rows">${rows}</div></div>`;
+}
+
+function catBars(s){
+  const e=Object.entries(s.cat).sort((a,b)=>b[1]-a[1]), max=e[0][1];
+  return `<div class="hb">${e.map(([k,v])=>`<div class="r"><span>${CAT[k][0]}</span><span class="t"><i style="width:${v/max*100}%;background:${CAT[k][2]}"></i></span><span class="val num">${fmt(v)}</span></div>`).join("")}</div>`;
+}
+
+function month(m){
+  const s=stats(m), net=s.total-m.expense;
+  return `<section class="month" id="${m.id}">
+   <div class="mhead"><h2>${m.th}</h2><span>${m.en}${m.partial?" · 1–10 ต.ค. (ยังไม่ปิดเดือน)":""}</span></div>
+   <div class="sheet">
+     <h3>ปฏิทินยอดขายรายวัน<small>Daily sales calendar · จำนวนรายการ และยอดขาย (บาท)</small></h3>
+     ${calendar(m,s)}
+     <div class="legend"><span><i style="background:var(--accent-soft);border:1px solid var(--accent)"></i>วันที่มียอดขาย</span><span><i style="background:var(--accent)"></i>แถบล่าง = ยอดขายเทียบกับวันสูงสุด</span><span>ขายได้ ${s.active} จาก ${m.lastDay||s.dim} วัน</span></div>
+   </div>
+   <div class="sheet">
+     <h3>สรุปยอดขาย${m.short}<small>Sales dashboard</small></h3>
+     <div class="kpis">
+       <div class="kpi"><span class="l">ยอดขายรวม / Sales</span><span class="v num">${baht(s.total)}</span><span class="s">บาท</span></div>
+       <div class="kpi"><span class="l">จำนวนรายการ / Orders</span><span class="v num">${fmt(s.n)}</span><span class="s">รายการ</span></div>
+       <div class="kpi"><span class="l">เฉลี่ยต่อรายการ / Avg order</span><span class="v num">${baht(Math.round(s.total/s.n))}</span><span class="s">บาท/รายการ</span></div>
+       <div class="kpi"><span class="l">รายจ่าย / Expenses</span><span class="v num">${baht(m.expense)}</span><span class="s">${m.partial?"รวมเฉพาะรายการที่สรุปแล้ว":"บาท"}</span></div>
+       <div class="kpi net"><span class="l">คงเหลือสุทธิ / Net</span><span class="v num">${m.partial?"–":baht(net)}</span><span class="s">${m.partial?"รอปิดเดือน":"ยอดขาย − รายจ่าย"}</span></div>
+     </div>
+     <div class="panel"><h4>ยอดขายรายวัน / Daily sales</h4>${areaChart(m,s)}</div>
+     <div class="grid2">
+       <div class="panel"><h4>ช่องทางรับเงิน / Payment channels</h4>${donut(m,s.total)}</div>
+       <div class="panel"><h4>ยอดขายตามประเภทสินค้า (บาท) / By product</h4>${catBars(s)}</div>
+     </div>
+   </div>
+  </section>`;
+}
+
+summary();
+document.getElementById("months").innerHTML=MONTHS.map(month).join("");
+if(location.hash){const el=document.querySelector(location.hash.replace(/[^#\w-]/g,""));if(el)el.scrollIntoView();}
+</script>
+
+</body></html>
